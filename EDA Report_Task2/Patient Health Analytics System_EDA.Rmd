@@ -1,0 +1,316 @@
+---
+title: "Patient Health EDA Report"
+author: 'Shreya Manchikanti : C5062333'
+output:
+  word_document: default
+  pdf_document: default
+toc: true
+number_sections: true
+---
+
+# Introduction
+
+The rising trends of cardiovascular diseases and stroke have emerged as a significant health issue of concern in the world, indicating the necessity of implementing powerful data-driven solutions to aid early detection and prevention. This study is an Exploratory Data Analysis (EDA) report of a patient health dataset that included demographic, clinical, and lifestyle-related variables related to the risk of stroke. The main purpose of this analysis is to investigate the structure, quality and underlying patterns in the dataset to facilitate improved clinical interpretation and data-informed decision-making. 
+
+Some of the features in the dataset include age, body mass index (BMI), glucose levels, hypertension, smoking status, physical activity, and stroke occurrence. This study aims to discover the relationship between these variables and evaluate their impact on the risk of stroke through a systematic data exploration. The data cleaning and preparation, descriptive statistical summarisation and different visualisation methods to reveal trends and distributions are included in the analysis. 
+
+Moreover, correlation and trend analysis are done to determine how strong and in which direction the relationships between key variables are. The findings of this work will help draw attention to key risk factors and trends in the data, which could benefit healthcare providers and analysts in enhancing their patient monitoring, preventive measures, and overall data collection procedures..
+
+---
+
+```{r}
+# Data Import & Setup
+library(tidyverse)
+library(ggplot2)
+library(corrplot)
+library(DescTools)
+library(corrplot)
+```
+
+This output shows that the tidyverse package is loaded into the R environment successfully and is available to be used in the analysis. It contains important libraries like dplyr, which is used to manipulate data, ggplot2, which is used to visualise data, readr, which is used to read data, and tidyr, which is used to clean data. The version information of each package is shown. The message also brings up function conflicts where functions such as filter () and lag () in dplyr replace functions in base R. This is a normal behaviour, and users may solve the conflicts with the help of the conflicted package in case of necessity.
+
+```{r}
+## Loading the dataset 
+data <- read.csv("data.csv")
+
+## Viewing first few rows
+head(data)
+```
+
+This output also confirms that the dataset is loaded into R and saved in the variable data using the read.csv("data.csv) function. The head(data) command in the SQL query presents the first 6 records, which give a rough idea of the structure and variables in the dataset. The dataset has several variables like Age, with a range of 30 to 78 in the sample, the values of BMI between 19.8 and 49.9 and the values of Average Glucose Levels between 116.57 and 267.30. It also has some categorical variables like Gender, Smoking Status, Physical Activity and Region. Binary variables like Hypertension and Stroke Occurrence (0 or 1) are also present. This is necessary to ensure that the importation of the dataset has been done properly and to familiarise oneself with the kinds and scales of variables before further analysis.
+
+```{r}
+## Checking dimensions
+dim(data)
+```
+
+This data indicates the size of the data set with the dim(data) command. The result [1] 172000, 22 means that the dataset has 172,000 rows (observations) and 22 columns (variables). The 22 columns are the various features (such as Age, BMI, Glucose Level, Hypertension, and Stroke Occurrence) of a single patient record, and the rows are the individual patients. The high count of observations indicates that the data set is considerable and can be statistically analysed. The presence of 22 variables suggests a rich dataset that has numerical and categorical variables as well, which can be explored to discover numerous relationships, trends, and patterns of stroke risk and patient health.
+
+```{r}
+## Checking structure of the data
+str(data)
+```
+
+This data indicates the size of the data set with the dim(data) command. The result [1] 172000, 22 means that the dataset has 172,000 rows (observations) and 22 columns (variables). The 22 columns are the various features (such as Age, BMI, Glucose Level, Hypertension, and Stroke Occurrence) of a single patient record, and the rows are the individual patients. The high count of observations indicates that the data set is considerable and can be statistically analysed. The presence of 22 variables suggests a rich dataset that has numerical and categorical variables as well, which can be explored to discover numerous relationships, trends, and patterns of stroke risk and patient health.
+
+---
+
+# Cleaning & Preparation
+
+```{r}
+## Checking for missing values
+colSums(is.na(data))
+```
+
+The null or undefined values check with colSums(is.na(data)) is used to verify that the dataset does not contain any null or undefined values or any entries. The values of all the variables, such as Age, BMI, Average Glucose Level, Hypertension, Smoking Status, and Stroke Occurrence, are 0, which means that no data is missing in the whole dataset. This completeness rate of 172,000 observations and 22 variables is a high quality of data and consistency. 
+The lack of missing values also means that further preprocessing processes like imputation or deleting rows are not necessary and may cause bias or shrink the dataset size in some cases. This enables all the records to be stored and analysed, enhancing the accuracy and reliability of the statistical findings. In general, the data is in an excellent format to continue with additional exploratory analysis, visualisation, and modelling of stroke risk factors.
+
+---
+
+```{r}
+# Descriptive Statistics
+summary(data)
+```
+
+The descriptive statistics created by the summary(data) command give a summary of both numerical and categorical variables in the data set. The mean age of patients is about 54 years, with the range being 18-90, which reflects the demographics of the population, which is mostly middle-aged and older. The average BMI is approximately 30, and the minimum and maximum weights are 10 and 50, respectively, indicating that most people are either overweight or obese. The mean glucose rate is 184.9, with a range of 70-300, which indicates high variability in metabolic health. The mean stroke risk score is 50.62 with a range of 1-100, which implies that the risk level is distributed widely. Binary variables like hypertension (mean 0.15) and incidence of stroke (mean 0.099) demonstrate that the percentage of patients with the condition is lower. 
+
+---
+
+# Visualisations
+
+## Histogram
+
+```{r}
+
+### Age Distribution 
+ggplot(data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "black") +
+  labs(title = "Age Distribution", x = "Age", y = "Count")
+```
+
+The histogram shows the distribution of ages of the patients in the dataset, with the x-axis being Age between about 25 and 75 years, and the y-axis depicting the frequency (count) of patients in each age group. The distribution seems to be relatively balanced over most age intervals, with most of the bins having counts of 11,000 to 12,500 people, which shows that the data used has a balanced distribution of the various age groups. No great skew is observed, indicating that younger and older groups are represented in proportion. 
+
+Nevertheless, there is a minor decrease at the very high age distribution (around 8590 years), where the number drops to about 7,0008,000, indicating the presence of fewer very old patients. The similarity in the numbers of ages is also notable, with a significant count in 30 and above years and 80 years and above, indicating good representation of the Middle Ages and older adults, essential in the analysis of the risks associated with stroke. This distribution is a good starting point in analysing age patterns and trends within the data since the risk of a stroke tends to rise with age.
+
+```{r}
+### BMI Distribution
+ggplot(data, aes(x = BMI)) +
+  geom_histogram(binwidth = 2, fill = "steelblue", color = "black") +
+  labs(title = "BMI Distribution", x = "BMI", y = "Count")
+```
+
+The histogram shows the frequency distribution of the Body Mass Index (BMI) values in the given dataset, with the x-axis indicating the values of BMI between the range of about 10 to 50 and the y-axis indicating the number of patients in each BMI value. Its distribution is fairly even, with the counts typically ranging between 8,000 and 9,000 patients per bin, which means that there are relatively even distributions of patients of varied BMI categories. There are smaller frequencies at the ends, especially below 12 BMI and above 48 BMI, where the counts are around 4,000-5,000, indicating fewer people in both very low and very high BMI. 
+
+The mean BMI in the data is about 30, and that is on the border of obesity, meaning that a significant percentage of the population is on the boundary of overweight or obese. This is important in terms of health, because higher BMI is usually related to a higher risk of cardiovascular diseases and stroke. The distribution demonstrates that BMI is a variable with a broad range, which makes it significant to further analyse health risks.
+
+```{r}
+
+### Glucose Level Distribution
+ggplot(data, aes(x = Average.Glucose.Level)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "black") +
+  labs(title = "Glucose Level Distribution", x = "Glucose Level", y = "Count")
+```
+
+The histogram indicates the distribution of Average Glucose Levels in the dataset, with the x-axis indicating the glucose levels (between 100 and 300, approximately) and the y-axis indicating the number of patients in each range. The distribution is found to be fairly homogenous, with most glucose ranges having counts between 7,000 and 7,800 people per bin, which may indicate that patients are evenly spread over the various glucose levels. 
+
+The distribution of the count is higher at the lower and upper sides, with a range of about 3,500 to 4,000 at both ends, below 90 and above 290, respectively. The mean value of glucose is about 184.9, which is quite high and can prove that there are a number of patients having high blood sugar levels. This is of clinical significance because high glucose is linked with diabetes and stroke. The broad distribution of values emphasises a significant amount of variation, so glucose level is a key determinant of health outcome further analysis.
+
+---
+
+## Box Plot
+
+```{r}
+### BMI vs Stroke Occurrence
+ggplot(data, aes(x = Stroke.Occurrence, y = BMI)) +
+  geom_boxplot() + aes(group = Stroke.Occurrence) +
+  labs(title = "BMI vs Stroke Occurrence", x = "Stroke Occurrence", y = "BMI")
+```
+
+The boxplot is used to compare the two variables of BMI and stroke occurrence, where the x-axis is Stroke Occurrence (0 and 1) and the y-axis is BMI (10-50). The BMI of the two groups is approximately 30, meaning that the central values are similar. The interquartile value is between 20 and 40 with a uniform dispersion. The whiskers are between 10 and 50, which is a wide variation. The two groups do not differ significantly, and this is an indication that BMI is not a good predictor of stroke. But a bit more variation in the group of the strokes suggests that extreme values of BMI can play a role in combination with other variables.
+
+```{r}
+### Glucose Level vs Smoking Status
+ggplot(data, aes(x = Smoking.Status, y = Average.Glucose.Level)) +
+  geom_boxplot() + aes(group = Smoking.Status) +
+  labs(title = "Glucose Level vs Smoking Status", x = "Smoking Status", y = "Glucose Level")
+```
+
+The boxplot is a comparison of glucose levels among the different categories of smoking, where the x-axis is the Smoking Status (Formerly smoked, never smoked, Smokes, Unknown) and the y-axis is glucose levels (100-300). All the groups have a median of approximately 180-190, which means that the central values are similar. Interquartile range is 130-240 with even distribution of data between categories. In smokers and former smokers, slightly higher values of the upper quartile (240-250) are observed, but there are few differences. All in all, the existence of a strong overlap implies that smoking and the level of glucose are correlated weakly.
+
+```{r}
+### Hypertension vs stroke risk
+ggplot(data, aes(x = Hypertension, y = Stroke.Risk.Score)) +
+  geom_boxplot() + aes(group = Hypertension) +
+  labs(title = "Hypertension vs Stroke Risk Score", x = "Hypertension", y = "Stroke Risk Score")
+```
+
+The boxplot is used to compare the hypertension state and stroke risk score, where the x-axis is Hypertension (0 = no, 1 = yes) and the y-axis is Stroke Risk Score (0-100). The median of the two groups is close to 50, meaning that the central values are similar. The interquartile range is 25-75, and it is dispersed widely. The hypertension upper quartile is a little higher (approximately 75-80) than that of non-hypertension (approximately 75). The whiskers range between 0 and 5 to 100, which means a great degree of variation. Although there is some overlap, persons with hypertension have a slightly higher risk score, indicating that hypertension is a risk factor but not the sole one.
+
+```{r}
+### Activity vs BMI
+ggplot(data, aes(x = Physical.Activity, y = BMI)) +
+  geom_boxplot() + aes(group = Physical.Activity) +
+  labs(title = "Physical Activity vs BMI", x = "Physical Activity Level", y = "BMI")
+```
+
+The boxplot indicates the BMI at the levels of activity, the x-axis is the levels of Physical Activity (Active, Light, Moderate, Sedentary), and the y-axis is the BMI (10-50). The central tendency of all groups is approximately 30, suggesting similar median values. The interquartile range is between 20 and 40, with a spread of similar values. The range of whiskers is 10-50, which is very diverse. Sedentary people portray a bit more BMI values (approximately 35-45), and active individuals portray a bit less (approximately 20-30). This implies that physical activity can affect BMI, but variations are not sharply contrasting between groups.
+
+---
+
+## Scatter Plot
+
+```{r}
+### Age vs glucose
+ggplot(data, aes(x = Age, y = Average.Glucose.Level)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Age vs Glucose Level", x = "Age", y = "Glucose Level")
+```
+
+The scatter plot can be used to illustrate the correlation between age and glucose level, with the x-axis being Age (20-80 years) and the y-axis being glucose levels (70-300). The score points are clustered, and this means that there is a high variability. No powerful linear trend is observed, but a slight upward trend is present. The glucose values of the young (18-40) group are distributed across the entire range, and the glucose values of the older (60+) group are slightly more concentrated at high values. Nevertheless, the dissemination is broad across all ages. This implies that age by itself is not a major determinant of glucose, and other variables are most likely to play a role in glucose fluctuation.
+
+```{r}
+### Age vs Stroke Risk Score
+ggplot(data, aes(x = Age, y = Stroke.Risk.Score)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Age vs Stroke Risk Score", x = "Age", y = "Stroke Risk Score")
+```
+
+The scatter plot shows the age and stroke risk score, with the x-axis displaying Age (20-80 years) and the y-axis displaying Stroke Risk Score (0-100). The graph looks overcrowded with overlapping points because of the huge dataset. The range of values (0 to 100) is found in all age groups with a high level of variability. There is no visual trend that can be distinguished due to overplotting. Nonetheless, a bit more concentrations of values are observed at higher levels among older people (60+). In general, the plot indicates that stroke risk is not age-specific; age alone cannot be used to explain the stroke risk without other factors contributing to the stroke risk.
+
+```{r}
+### BMI vs Glucose Level
+ggplot(data, aes(x = BMI, y = Average.Glucose.Level)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "BMI vs Glucose Level", x = "BMI", y = "Glucose Level")
+```
+
+The scatter plot indicates a connection between the BMI and the glucose level, with the x-axis depicting the BMI levels (10-50) and the y-axis showing the glucose levels (70-300). The graph would be crowded with many overlapping points, and thus patterns are not easily spotted due to the large size of the dataset. Glucose values in the entire spectrum can be found at both low BMI (15-20) and high (40-50). The homogenous dispersion points to no evident observable trend. On the whole, the plot indicates a weak or no strong relationship and indicates that BMI alone does not have a strong effect on glucose levels.
+
+---
+
+## Bar Chart
+```{r}
+### Smoking Status Distribution
+ggplot(data, aes(x = Smoking.Status)) +
+  geom_bar(fill = "steelblue", color = "black") +
+  labs(title = "Smoking Status Distribution", x = "Smoking Status", y = "Count")
+```
+
+The bar chart has the distribution of smoking status; in this case, the x-axis represents the smoking categories (Formerly smoked, never smoked, Smokes, Unknown) and the y-axis represents the number of people. Never smoked has the largest number of about 100,000-105,000 people. The former smokers are next in line with approximately 30,000-35,000 people, followed by the Smokers and Unknown with approximately 15,000-18,000 people. Its distribution is very skewed to the non-smokers. This imbalance means that the majority of the patients are not smokers, and any smoking analysis should take into consideration the leadership of this group, but not forget about the smaller groups.
+
+```{r}
+### Physical Activity Levels
+ggplot(data, aes(x = Physical.Activity)) +
+  geom_bar(fill = "steelblue", color = "black") +
+  labs(title = "Physical Activity Levels", x = "Physical Activity Level", y = "Count")
+```
+
+The bar chart is used to show the level of physical activity, with the x-axis showing the category of activity (Active, Light, Moderate, Sedentary) and the y-axis showing the number of individuals. The biggest group is the Sedentary, consisting of about 68,000-70,000 persons. Light activity is next with approximately 50,000-52,000 people, whereas there are 34,000-36,000 moderates. The least extensive is Active and comprises about 15,000-17,000 people. This demonstrates a big imbalance in the least active levels, which suggests poor participation in physical activity. This trend could lead to greater health hazards, such as obesity and stroke.
+
+```{r}
+### Regional Distribution
+ggplot(data, aes(x = Region)) +
+  geom_bar(fill = "steelblue", color = "black") +
+  labs(title = "Regional Distribution", x = "Region", y = "Count")
+```
+
+The bar chart demonstrates the distribution in the regions, with the x-axis depicting the regions (East, North, South, West) and the y-axis depicting the number of individuals. The population density is nearly equal in each region, with an average of 42,000-44,000 people. The East and North are a little higher at 44,000, and the South and West are a little lower at 42,000-43,000. The variations are very slight, not regionally biased. This sampling evenly spreads health patterns and risk of stroke across regions, and the findings are valid and not affected by the uneven distribution of samples.
+
+---
+
+## Correlation Matrix
+
+```{r}
+### Converting categorical variables to factors
+data$Gender              <- as.factor(data$Gender)
+data$Smoking_Status      <- as.factor(data$Smoking.Status)
+data$Region              <- as.factor(data$Region)
+data$Physical_Activity   <- as.factor(data$Physical.Activity)
+data$Hypertension        <- as.factor(data$Hypertension)
+data$Heart_Disease       <- as.factor(data$Heart.Disease)
+data$Stroke_Occurrence   <- as.factor(data$Stroke.Occurrence)
+
+### Selecting only categorical (factor) variables
+cat_data <- data[, sapply(data, is.factor)]
+
+# Creating empty matrix
+cramer_matrix <- matrix(NA, ncol = ncol(cat_data), nrow = ncol(cat_data))
+colnames(cramer_matrix) <- colnames(cat_data)
+rownames(cramer_matrix) <- colnames(cat_data)
+
+# Compute Cramér's V for each pair
+for(i in 1:ncol(cat_data)){
+  for(j in 1:ncol(cat_data)){
+    cramer_matrix[i, j] <- DescTools::CramerV(
+      table(cat_data[, i], cat_data[, j])
+    )
+  }
+}
+
+# Plotting heatmap
+corrplot(cramer_matrix, method = "color", tl.cex = 0.7)
+```
+
+The heatmap presents the correlation between numerical variables with values that are +1 and -1. The diagonal values are 1, which means that there is a perfect self-correlation. The majority of the off-diagonal values are light, implying a weak to medium relationship. Age, Average Glucose Level and Stroke Risk Score variables are slightly positively correlated at a 0.4-0.6 level, which means that there is a slight increase in risk with age and glucose. Conversely, BMI, Alcohol Consumption, Chronic Stress, and Sleep Hours exhibit weaker correlations of around 0-0.2, which means there are weak linear relationships. There are no significant negative correlations. In general, stroke risk is not determined by one variable, but by a combination of factors.
+
+The heatmap represents the relationship between categorical variables with a range of values between 0 and 1, with the value nearer to 1 being strongly associated and a value nearer to 0 being weakly associated or not associated. All the diagonal values are equal to 1.0, meaning that all variables are perfectly associated with themselves. The majority of the off-diagonal values are very low, with most of them being around the range of 0.0 to 0.2, which means that there are weak relationships existing between variables like Gender, Region, Smoking Status, and Physical Activity. All values near 0.5 and above are absent, hence no strong associations. This implies that categorical variables are mostly independent and have no significant effect on one another.
+
+---
+
+#  Relationship and Trend Analysis
+
+```{r}
+# Plotting the Relationship and trend for Age vs Stroke Risk Score
+ggplot(data, aes(x = Age, y = Stroke.Risk.Score)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Age vs Stroke Risk Score", x = "Age", y = "Stroke Risk Score") +
+  geom_smooth(method = "loess", color = "red")
+```
+
+The scatter plot displays the correlation between age and stroke risk score, with the x-axis (age) ranging from 20 to 80 years and the y-axis (stroke risk score) ranging from 0 to 100. Since there is a significant amount of data, the graph is visually crowded with overlapping points, and the patterns are not easily discernible. The risk scores of strokes, ranging between 0 and 100, have been shown to vary across all ages, implying that the scores are very diverse. There is no apparent trend, but the mean concentration values are somewhat higher in the 50-100 range of older ages (over 60). This indicates that there is a weak positive association, and age itself is not a very strong predictor of stroke risk.
+
+```{r}
+# Plotting the Relationship and trend for BMI vs Glucose Level
+ggplot(data, aes(x = BMI, y = Average.Glucose.Level)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "BMI vs Glucose Level", x = "BMI", y = "Glucose Level") +
+  geom_smooth(method = "loess", color = "red")
+```
+
+The relationship between BMI and glucose level can be seen in the scatter plot, whereby the x-axis corresponds to BMI (10 to 50) and the y-axis corresponds to glucose level (100 to 300). The graph is crowded with overlapping values since there are many pieces of data, and it is not easy to see patterns on the graph. The values of glucose throughout the entire range are found at almost all levels of BMI, which means that they are uniformly distributed. It does not show a strong or linear relationship, as there is no evident upward or downward trend. This suggests that BMI is not a significant determinant of glucose levels on its own and that there are other variables which probably contribute to changes in glucose.
+
+```{r}
+# Plotting the Relationship and trend for Glucose Level vs Smoking Status
+ggplot(data, aes(x = Smoking.Status, y = Average.Glucose.Level)) +
+  geom_boxplot() + aes(group = Smoking.Status) +
+  labs(title = "Glucose Level vs Smoking Status", x = "Smoking Status", y = "Glucose Level") +
+  geom_smooth(method = "loess", color = "red")
+```
+
+The boxplot indicates the glucose levels by categories of smoking, in which the x-axis indicates the status of smokers and the y-axis indicates the glucose levels (70-300). The central value of all the groups is approximately 180-190, which shows that the central values are very similar. Each category has a consistent distribution with an interquartile range between 130 and 240. The lowest values are near 70, and the highest value is approximately 300 in all groups. The overlap between categories is high, such that no clear difference is apparent. All smoking groups have a similar distribution of glucose levels, indicating that smoking status does not have a strong relationship with glucose level.
+
+```{r}
+# Plotting the Relationship and trend for Hypertension vs Stroke Risk Score
+ggplot(data, aes(x = Hypertension, y = Stroke.Risk.Score)) +
+  geom_boxplot() + aes(group = Hypertension) +
+  labs(title = "Hypertension vs Stroke Risk Score", x = "Hypertension", y = "Stroke Risk Score") +
+  geom_smooth(method = "loess", color = "red")
+```
+
+The boxplot generates a comparison of the stroke risk scores according to the hypertension status, where the x-axis is Hypertension (0 and 1), and the y-axis is Stroke risk score (0-100). The central values of the two groups are similar since their medians are approximately 50. The interquartile range is approximately 25 to 75 for each category, and it is similar in distribution. There are minimum values that are nearer to 0 and maximum values that are nearer to 100 in both groups. The hypertension group (1) has slightly more upper values, although the distributions overlap. In general, the correlation is moderate, which indicates that hypertension can be a risk factor for stroke, but not the only one.
+
+---
+
+# Insights and Interpretation
+
+The exploratory data analysis shows that there are several major trends in the patient health data and that it presents valuable insights into the factors that affect the risk of stroke. An additional significant variable is age, where an increased stroke risk score can be more prevalent among older people, especially those older than 60 years. This indicates that ageing has a major role to play in making people more vulnerable to stroke. 
+
+The numerical variables analysis demonstrates that BMI and glucose levels are very broadly distributed. The median BMI is approximately 30, which means that most people are either overweight or obese. Nonetheless, visualisations indicate that BMI is not a strong predictor of stroke risk or glucose level. In a similar manner, glucose levels have a wide range of 70 to 300 in all persons, which means that there is a lot of variability in metabolic health. The factors of lifestyle also add to the general comprehension. 
+
+A big percentage of the population is either inactive or moderately active, which can be indirectly connected with the elevation of health risks. There is little variation in smoking status across glucose levels, indicating a weak independent effect. The relationship analysis by correlation proves that most of the associations are weak to moderate, and it is not a single variable but a combination of factors that increases the risk of stroke.
+
+---
+
+# Transparency Statement 
+
+This activity has been completed without the use of Artificial Intelligence (AI). The entire process of the exploratory data analysis, such as data cleaning, statistical analysis, data visualisation, interpretation and report writing, has been done independently. Anything and every method and approach that has been followed in this report has been built in compliance with the academic requirements and guidelines of the University. This declaration reassures the fact that the work presented is fully original and has been done with honesty and following the rules of academic honesty and ethical behaviour.
